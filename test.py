@@ -11,10 +11,10 @@ html = """
 
 code = """
 class Wrapper {
-  constructor(exprGenerator) {
+  constructor(generator) {
     Object.defineProperty(this, 'foo', {
       enumerable: true,
-      get: exprGenerator
+      get: generator
     });
   }
 }
