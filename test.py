@@ -1,13 +1,4 @@
-import os
 import json
-
-html = """
-<!DOCTYPE html>
-<html><head>
-</head>
-<body></body>
-</html>
-"""
 
 code = """
 class Wrapper {
@@ -25,13 +16,6 @@ const done = arguments[1];
 done(f);
 """
 
-html_file = os.path.abspath("index.html")
-with open(html_file, "w") as f:
-    f.write(html)
-url = f"file://{html_file}"
-
-results = {}
-
 for driver_name in ["chrome", "firefox"]:
     if driver_name == "firefox":
         from selenium.webdriver import Firefox as Driver
@@ -44,7 +28,7 @@ for driver_name in ["chrome", "firefox"]:
     options.add_argument("--headless")
     driver = Driver(options=options)
     try:
-        driver.get(url)
+        driver.get('about:blank')
         output = driver.execute_async_script(code, {})
     finally:
         driver.close()
@@ -52,4 +36,3 @@ for driver_name in ["chrome", "firefox"]:
     print("-------------------------------")
     print(f"Full output for {driver_name}")
     print(json.dumps(output, indent=2))
-    results[driver_name] = output
