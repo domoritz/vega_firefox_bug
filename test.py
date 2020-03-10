@@ -3,43 +3,27 @@ import json
 
 html = """
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Embedding Vega-Lite</title>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.0.2"></script>
+<html><head>
 </head>
-<body>
-  <div id="vis"></div>
-</body>
+<body></body>
 </html>
 """
 
 code = """
-const spec = arguments[0];
-const done = arguments[1];
-done(vegaLite.compile(spec).spec);
-"""
-
-vegalite_spec = {
-    "data": {
-        "values": [
-            {"a": "A", "b": 28},
-            {"a": "B", "b": 55},
-            {"a": "C", "b": 43},
-            {"a": "D", "b": 91},
-            {"a": "E", "b": 81},
-            {"a": "F", "b": 53},
-            {"a": "G", "b": 19},
-            {"a": "H", "b": 87},
-            {"a": "I", "b": 52},
-        ]
-    },
-    "mark": "bar",
-    "encoding": {
-        "x": {"field": "a", "type": "ordinal"},
-        "y": {"field": "b", "type": "quantitative"},
-    },
+class Wrapper {
+  constructor(exprGenerator) {
+    Object.defineProperty(this, 'foo', {
+      enumerable: true,
+      get: exprGenerator
+    });
+  }
 }
+
+const f = new Wrapper(() => "Hello World")
+
+const done = arguments[1];
+done(f);
+"""
 
 html_file = os.path.abspath("index.html")
 with open(html_file, "w") as f:
@@ -61,15 +45,11 @@ for driver_name in ["chrome", "firefox"]:
     driver = Driver(options=options)
     try:
         driver.get(url)
-        vega_spec = driver.execute_async_script(code, vegalite_spec)
+        output = driver.execute_async_script(code, {})
     finally:
         driver.close()
 
     print("-------------------------------")
     print(f"Full output for {driver_name}")
-    print(json.dumps(vega_spec, indent=2))
-    results[driver_name] = vega_spec
-
-print("----------------------------")
-for driver_name, vega_spec in results.items():
-    print(f'{driver_name}: spec.scales[1].range = {vega_spec["scales"][1]["range"]}')
+    print(json.dumps(output, indent=2))
+    results[driver_name] = output
